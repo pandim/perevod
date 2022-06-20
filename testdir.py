@@ -105,8 +105,8 @@ data = dict()
 with open(os.path.join(newpath + "translate.txt"), encoding='utf-8') as file:
     try:
         while True:
-            key = next(file).replace("\n", "")
-            value = next(file).replace("\n", "")
+            key = next(file).rstrip("\n")
+            value = next(file).rstrip("\n")
             data[key] = value
     except StopIteration:
         pass  # Достигнут конец файла
