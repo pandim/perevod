@@ -4,20 +4,24 @@ import time
 
 # pip install googletrans==3.1.0a0
 from googletrans import Translator
+# import httpcore
+from httpcore import ConnectTimeout, ReadTimeout
 
+timesleep = 0
+error_num = 0
 
-def Translate(addDir, entry):
+def translate(adddir, entry):
+    global error_num
     # print(addDir, entry)
-    filein = open(os.path.join(enpath + addDir + "/" + entry), 'r')
-    mypath = os.path.join(newpath + addDir)
+    filein = open(os.path.join(enpath + adddir + "/" + entry), 'r')
+    mypath = os.path.join(newpath + adddir)
     pathlib.Path(mypath).mkdir(parents=True, exist_ok=True)
     fileout = open(os.path.join(mypath + "/" + entry), "wt", encoding='utf-8')
-    print("\n" + addDir + "/" + entry + " :")
+    print("\n" + adddir + "/" + entry + " :")
     #  i = 1
     while True:
         # считываем строку
         line = filein.readline()
-        timesleep = 0
         # прерываем цикл, если строка пустая
         if not line:
             break
@@ -31,9 +35,21 @@ def Translate(addDir, entry):
             #            strres = ""
             if len(a[3].strip()) > 0:
                 if a[3] not in data:
+                    res = ""
+                    while True:
+                        try:
+                            time.sleep(timesleep)
+                            res = translator.translate(a[3], src='en', dest='ru')
+                            # print(res)
+                            break  # hz
+                        except Exception:
+                            print("Exception reset\n")
+                            error_num += 1
+                            # continue
 
-                    res = translator.translate(a[3], src='en', dest='ru')
-                    time.sleep(timesleep)
+                    # time.sleep(timesleep)
+                    # res = translator.translate(a[3], src='en', dest='ru')
+
                     strres = res.text.replace("$ (", "$(")  # string.replace(oldStr, newStr, count)
                     strres = strres.replace("$( ", "$(")
                     strres = strres.replace(" )", ")")
@@ -72,7 +88,7 @@ def translatefolder(rootdir):
         if os.path.isfile(fullentry) and entry.split('.')[-1].lower() == 'json':
             addDir = rootdir.replace(enpath, "")
 
-            Translate(addDir, entry)
+            translate(addDir, entry)
             # print(addDir, "   ", entry)
         if os.path.isdir(fullentry):
             translatefolder(fullentry)
@@ -94,7 +110,7 @@ def translatefolder(rootdir):
 print('=======================================')
 translator = Translator()
 path = "c:/22/Lexicon-git-my/Lexicon/src/main/resources/data/lexicon/patchouli_books/lexicon/"
-timesleep = 2
+
 enpath = path + "en_us/"
 lang = "ru_ru"
 newpath = path + lang + "/"
@@ -102,7 +118,10 @@ if not os.path.isdir(newpath):
     os.mkdir(newpath)
 
 data = dict()
-with open(os.path.join(newpath + "translate.txt"), encoding='utf-8') as file:
+file = os.path.join(newpath + "translate.txt")
+with open(file, mode='a'):
+    pass
+with open(file, encoding='utf-8') as file:
     try:
         while True:
             key = next(file).rstrip("\n")
@@ -123,3 +142,8 @@ for key in data:
     f.write(key + "\n")  # надо поменять на запись в словарь
     f.write(data[key] + "\n")
 f.close()
+print("Error: " + str(error_num))
+
+
+# if __name__ == '__main__':
+#     main()
