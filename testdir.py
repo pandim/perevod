@@ -22,19 +22,15 @@ def translate(adddir, entry):
     while True:
         # считываем строку
         line = filein.readline()
-        # прерываем цикл, если строка пустая
+        # прерываем цикл, если нет строки
         if not line:
             break
-        # print(str(i) + "  " + str(len(line)) + "   ", end='')
-        if "\"text\":" in line or "\"name\":" in line or "\"description\":" in line:
 
-            a = line.split("\"", 5)
-            #  strin = a[3].strip()
-            #  print("a[3]:\"" + a[3] + "\"")
+        if "\"text\":" in line or "\"name\":" in line or "\"description\":" in line or "\"title\":" in line:
 
-            #            strres = ""
-            if len(a[3].strip()) > 0:
-                if a[3] not in data:
+            a = line.split("\"", 5)  # массив кусков строки
+            if len(a[3].strip()) > 0:  # в переводимом куске не только пробелы
+                if a[3] not in data:  # нету в словаре
                     res = ""
                     while True:
                         try:
@@ -45,37 +41,28 @@ def translate(adddir, entry):
                         except Exception:
                             print("Exception reset\n")
                             error_num += 1
-                            # continue
-
-                    # time.sleep(timesleep)
-                    # res = translator.translate(a[3], src='en', dest='ru')
 
                     strres = res.text.replace("$ (", "$(")  # string.replace(oldStr, newStr, count)
-                    strres = strres.replace("$( ", "$(")
+                    strres = strres.replace("$( ", "$(")  # поправляем перевод
                     strres = strres.replace(" )", ")")
                     strres = strres.replace("$(вещь)", "$(thing)")
                     strres = strres.replace("$(предмет)", "$(item)")
-                    textout.write(a[3] + "\n")  # надо поменять на запись в словарь
-                    textout.write(strres + "\n")  # надо поменять на запись в словарь
+                    textout.write(a[3] + "\n")  # обновили файл словаря оригиналом
+                    textout.write(strres + "\n")  # и переводом
 
-                    print('\n' + '(en_us) :' + a[3])
-                    line = a[0] + "\"" + a[1] + "\"" + a[2] + "\"" + strres + "\"" + a[4]
-                    print('(' + lang + ') :' + strres)
+                    print('\n' + '(en_us) :' + a[3])  # вывод на экран оригинала
+                    print('(' + lang + ') :' + strres)  # и перевода
 
-                    data[a[3]] = strres
+                    data[a[3]] = strres  # новый перевод
                 else:
-                    strres = data[a[3]]
+                    strres = data[a[3]]  # достали из словаря, если было
             else:
-                strres = a[3]
+                strres = a[3]  # непонятные один или несколько пробелов
 
-            # print('\n' + '(en_us) :' + a[3])
-            # line = a[0] + "\"" + a[1] + "\"" + a[2] + "\"" + strres + "\"" + a[4]
-            # print('(' + lang + ') :' + strres)
-
+            line = a[0] + "\"" + a[1] + "\"" + a[2] + "\"" + strres + "\"" + a[4]
         fileout.write(line)
-        #  i += 1
 
-    # закрываем файл
+    # закрываем файлы
     filein.close()
     fileout.close()
 
